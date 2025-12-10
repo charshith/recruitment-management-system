@@ -18,9 +18,17 @@ export default function App() {
 
   const checkAuth = async () => {
     try {
-      const token = await authService.getStoredToken();
+      // Add timeout to prevent infinite loading
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Timeout')), 3000)
+      );
+      
+      const tokenPromise = authService.getStoredToken();
+      const token = await Promise.race([tokenPromise, timeoutPromise]);
+      
       setIsAuthenticated(!!token);
     } catch (error) {
+      // If anything fails, just show login screen
       setIsAuthenticated(false);
     } finally {
       setIsLoading(false);
