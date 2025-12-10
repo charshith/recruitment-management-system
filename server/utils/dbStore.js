@@ -84,9 +84,16 @@ const initializeDefaultData = async () => {
 };
 
 // Initialize on module load (but don't block if DB isn't ready)
-initializeDefaultData().catch(err => {
-  console.warn('Could not initialize default data (DB may not be ready yet):', err.message);
-});
+// Only initialize if database is actually enabled and available
+if (process.env.USE_DB === 'true' || process.env.USE_DB === '1') {
+  // Delay initialization to allow server to start first
+  setTimeout(() => {
+    initializeDefaultData().catch(err => {
+      // Silently fail - database might not be set up yet
+      // This is expected if PostgreSQL isn't running
+    });
+  }, 1000);
+}
 
 // ============================================
 // ADMINS

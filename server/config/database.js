@@ -35,6 +35,10 @@ const query = async (text, params) => {
     const duration = Date.now() - start;
     return res;
   } catch (error) {
+    // Don't log query errors during initialization - they're expected if DB isn't set up
+    if (error.code === 'ECONNREFUSED' && process.env.USE_DB !== 'true' && process.env.USE_DB !== '1') {
+      throw error;
+    }
     console.error('Query error:', { text, error: error.message });
     throw error;
   }
