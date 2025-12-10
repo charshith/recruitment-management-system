@@ -22,7 +22,7 @@ api.interceptors.request.use(
     const recruiterToken = localStorage.getItem('token')
     
     // Check for client routes first (more specific)
-    if (url.startsWith('/client/') || url.startsWith('/clients/me')) {
+    if (url.startsWith('/client/') || url.startsWith('/clients/me') || url.startsWith('/sessions/me')) {
       if (clientToken) {
         config.headers.Authorization = `Bearer ${clientToken}`
       }

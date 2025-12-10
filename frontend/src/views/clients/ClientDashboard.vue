@@ -101,77 +101,37 @@
       </div>
     </div>
 
-    <!-- Session Status Card -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-      <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-gray-50 to-white dark:from-gray-800 dark:to-gray-700">
-        <div class="flex justify-between items-center">
-          <div>
-            <h2 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Session Status</h2>
-            <p class="mt-1 text-xs sm:text-sm text-gray-600 dark:text-gray-400">Current recruitment session activity</p>
-          </div>
-          <div class="flex items-center gap-3">
-            <button
-              @click="fetchSessionData"
-              class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 flex items-center gap-1"
-              title="Refresh session status"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              Refresh
-            </button>
-            <button
-              v-if="sessionHistory.length > 0"
-              @click="showSessionHistory = !showSessionHistory"
-              class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
-            >
-              {{ showSessionHistory ? 'Hide History' : 'View History' }}
-            </button>
-          </div>
-        </div>
+    <!-- Session Management - Same as recruiter view -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 sm:p-6 transition-colors duration-300 ease-in-out">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white">Session Management</h2>
+        <button
+          @click="loadSessions"
+          class="text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+        >
+          Refresh
+        </button>
       </div>
 
-      <!-- Active Session -->
-      <div v-if="activeSession && !sessionLoading && activeSession.id" class="p-4 sm:p-6">
-        <div class="flex items-start gap-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
-          <div class="flex-shrink-0">
-            <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-              <svg class="w-6 h-6 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <!-- Active Session Display -->
+      <div v-if="currentSession" class="mb-6">
+        <div class="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+              <svg class="w-4 h-4 text-white animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2 mb-2">
-              <h3 class="text-base font-semibold text-gray-900 dark:text-white">Active Session</h3>
-              <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium rounded-full">
-                Live
-              </span>
-            </div>
-            <div class="space-y-2 text-sm">
-              <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Duration: <strong class="text-gray-900 dark:text-white">{{ activeSessionDuration }}</strong></span>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-semibold text-gray-900 dark:text-white">Active Session</span>
+                <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-medium rounded-full">
+                  Live
+                </span>
               </div>
-              <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span>Started: <strong class="text-gray-900 dark:text-white">{{ formatTime(activeSession.startTime) }}</strong></span>
-              </div>
-              <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span>Jobs Applied: <strong class="text-gray-900 dark:text-white">{{ activeSession.jobsApplied || 0 }}</strong></span>
-              </div>
-              <div v-if="activeSession.recruiter" class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                <span>Recruiter: <strong class="text-gray-900 dark:text-white">{{ activeSession.recruiter.name }}</strong></span>
+              <div class="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400 mt-1">
+                <span>Duration: {{ sessionDuration }}</span>
+                <span>{{ currentSession.jobsApplied || 0 }} jobs</span>
               </div>
             </div>
           </div>
@@ -179,59 +139,42 @@
       </div>
 
       <!-- No Active Session -->
-      <div v-else-if="!sessionLoading" class="p-4 sm:p-6 text-center">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full mb-4">
-          <svg class="w-8 h-8 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <h3 class="text-sm sm:text-base font-medium text-gray-900 dark:text-white mb-1">No Active Session</h3>
-        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Your recruiter hasn't started a session yet.</p>
+      <div v-else class="mb-6 text-center py-4">
+        <p class="text-sm text-gray-500 dark:text-gray-400">No active session</p>
       </div>
 
-      <!-- Loading State -->
-      <div v-else class="p-4 sm:p-6">
-        <div class="animate-pulse space-y-4">
-          <div class="h-20 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
-        </div>
-      </div>
-
-      <!-- Session History (Collapsible) -->
-      <div v-if="showSessionHistory && sessionHistory.length > 0" class="border-t border-gray-200 dark:border-gray-700">
-        <div class="p-4 sm:p-6">
-          <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">Recent Sessions</h3>
-          <div class="space-y-3">
-            <div
-              v-for="session in sessionHistory"
-              :key="session.id"
-              class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
-            >
-              <div class="flex items-start justify-between mb-2">
-                <div>
-                  <p class="text-sm font-medium text-gray-900 dark:text-white">
-                    {{ formatDate(session.startTime) }}
-                  </p>
-                  <p class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ formatTime(session.startTime) }} - {{ formatTime(session.endTime) }}
-                  </p>
+      <!-- Previous Sessions - Exact same format as recruiter view -->
+      <div v-if="sessionHistory.length > 0" class="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <h3 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Previous Sessions</h3>
+        <div class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
+          <div
+            v-for="session in sessionHistory"
+            :key="session.id"
+            class="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <div class="flex items-center justify-between">
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <svg class="w-4 h-4 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ formatDate(session.endTime) }}</span>
                 </div>
-                <span class="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-full">
-                  {{ session.duration?.formatted || 'N/A' }}
-                </span>
-              </div>
-              <div class="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400">
-                <span class="flex items-center gap-1">
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  {{ session.jobsApplied || 0 }} jobs applied
-                </span>
-                <span v-if="session.recruiter" class="flex items-center gap-1">
-                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  {{ session.recruiter.name }}
-                </span>
+                <div class="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                  <span>{{ formatTime(session.startTime) }} - {{ formatTime(session.endTime) }}</span>
+                  <span class="flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {{ session.duration?.formatted || 'N/A' }}
+                  </span>
+                  <span class="flex items-center gap-1">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    {{ session.jobsApplied || 0 }} jobs
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -407,14 +350,10 @@ const pagination = ref({
   totalPages: 1
 })
 const showAllJobs = ref(false)
-const activeSession = ref(null)
+const currentSession = ref(null)
 const sessionHistory = ref([])
-const sessionLoading = ref(false)
-const showSessionHistory = ref(false)
-const activeSessionDuration = ref('0m')
-
-let sessionDurationInterval = null
-let sessionRefreshInterval = null
+const sessionDuration = ref('0m')
+let sessionTimer = null
 
 const displayedJobs = computed(() => {
   if (showAllJobs.value) {
@@ -433,67 +372,55 @@ const formatTime = (dateString) => {
   return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
 }
 
-const updateActiveSessionDuration = () => {
-  if (!activeSession.value || !activeSession.value.startTime) {
-    activeSessionDuration.value = '0m'
+const updateDuration = () => {
+  if (!currentSession.value || !currentSession.value.startTime) {
+    sessionDuration.value = '0m'
     return
   }
   
-  const start = new Date(activeSession.value.startTime)
+  const start = new Date(currentSession.value.startTime)
   const now = new Date()
   const diffMs = now - start
   const diffMinutes = Math.floor(diffMs / 1000 / 60)
   const hours = Math.floor(diffMinutes / 60)
   const minutes = diffMinutes % 60
   
-  if (hours > 0) {
-    activeSessionDuration.value = `${hours}h ${minutes}m`
-  } else {
-    activeSessionDuration.value = `${minutes}m`
-  }
+  sessionDuration.value = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
 }
 
-const fetchSessionData = async () => {
+const loadSession = async () => {
   try {
-    sessionLoading.value = true
-    const [activeResponse, historyResponse] = await Promise.all([
-      api.get('/sessions/me/active'),
-      api.get('/sessions/me/history', { params: { limit: 5 } })
-    ])
+    const response = await api.get('/sessions/me/active')
     
-    console.log('Session data fetched:', { 
-      active: activeResponse.data, 
-      history: historyResponse.data 
-    })
-    
-    // Handle null response (no active session)
-    activeSession.value = activeResponse.data || null
-    sessionHistory.value = historyResponse.data || []
-    
-    if (activeSession.value) {
-      updateActiveSessionDuration()
-      // Update duration every 10 seconds for live feel
-      if (sessionDurationInterval) {
-        clearInterval(sessionDurationInterval)
-      }
-      sessionDurationInterval = setInterval(() => {
-        updateActiveSessionDuration()
-      }, 10000) // Update every 10 seconds for live timer
+    if (response.data && response.data.id) {
+      currentSession.value = response.data
+      updateDuration()
+      
+      if (sessionTimer) clearInterval(sessionTimer)
+      sessionTimer = setInterval(updateDuration, 60000)
     } else {
-      if (sessionDurationInterval) {
-        clearInterval(sessionDurationInterval)
-        sessionDurationInterval = null
+      currentSession.value = null
+      if (sessionTimer) {
+        clearInterval(sessionTimer)
+        sessionTimer = null
       }
     }
   } catch (error) {
-    console.error('Error fetching session data:', error)
-    console.error('Error response:', error.response?.data)
-    // Don't show error toast for session data - it's not critical
-    activeSession.value = null
-    sessionHistory.value = []
-  } finally {
-    sessionLoading.value = false
+    currentSession.value = null
   }
+}
+
+const loadSessionHistory = async () => {
+  try {
+    const response = await api.get('/sessions/me/history', { params: { limit: 50 } })
+    sessionHistory.value = response.data || []
+  } catch (error) {
+    sessionHistory.value = []
+  }
+}
+
+const loadSessions = async () => {
+  await Promise.all([loadSession(), loadSessionHistory()])
 }
 
 const fetchDashboardData = async () => {
@@ -562,20 +489,15 @@ const loadPage = async (page) => {
 
 onMounted(() => {
   fetchDashboardData()
-  fetchSessionData()
+  loadSessions()
   
-  // Refresh session data every 15 seconds for faster updates
-  sessionRefreshInterval = setInterval(() => {
-    fetchSessionData()
-  }, 15000)
+  // Refresh sessions every 15 seconds
+  setInterval(loadSessions, 15000)
 })
 
 onUnmounted(() => {
-  if (sessionDurationInterval) {
-    clearInterval(sessionDurationInterval)
-  }
-  if (sessionRefreshInterval) {
-    clearInterval(sessionRefreshInterval)
+  if (sessionTimer) {
+    clearInterval(sessionTimer)
   }
 })
 </script>

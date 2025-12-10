@@ -6,6 +6,17 @@ const { verifyClient } = require('./clients');
 
 const { v4: uuidv4 } = require('uuid');
 
+// Helper to get database functions
+const getDbFunctions = () => {
+  try {
+    const db = require('../config/database');
+    return { query: db.query, getClient: db.getClient };
+  } catch (error) {
+    console.error('Failed to load database config:', error);
+    throw new Error('Database not available');
+  }
+};
+
 // Database is required - no file storage fallback
 let dbStore = null;
 try {
@@ -54,10 +65,13 @@ router.post('/start', verifyToken, async (req, res) => {
       return res.status(400).json({ error: 'Session already active' });
     }
 
+    // Ensure clientId is normalized (trimmed string)
+    const normalizedClientId = String(clientId).trim();
+    
     const newSession = {
       id: uuidv4(),
-      clientId,
-      recruiterId: req.user.id,
+      clientId: normalizedClientId,
+      recruiterId: String(req.user.id).trim(),
       status: 'active',
       startTime: new Date().toISOString(),
       endTime: null,
@@ -65,15 +79,7 @@ router.post('/start', verifyToken, async (req, res) => {
       updatedAt: new Date().toISOString()
     };
 
-    console.log(`[SESSIONS] Creating new session:`, { 
-      id: newSession.id, 
-      clientId: newSession.clientId, 
-      recruiterId: newSession.recruiterId 
-    });
-
     await dbStore.saveSessions([newSession]);
-    
-    console.log(`[SESSIONS] Session saved successfully for client ${clientId}`);
 
     // Create notification for client
     await dbStore.addNotification({
@@ -214,32 +220,24 @@ router.get('/client/:clientId/history', verifyToken, async (req, res) => {
 // CLIENT-SIDE SESSION ENDPOINTS
 // ============================================
 
-// Get active session for logged-in client
+// Get active session for logged-in client - EXACT SAME AS RECRUITER BUT NO RECRUITER FILTER
 router.get('/me/active', verifyClient, async (req, res) => {
   try {
     ensureDb();
     const clientId = req.user.id;
     
-    console.log(`[SESSIONS] Client ${clientId} requesting active session`);
-    
-    // Get all sessions for this client
-    const allSessions = await dbStore.getSessions({ clientId });
-    console.log(`[SESSIONS] Found ${allSessions.length} total sessions for client ${clientId}`);
-    
-    const activeSession = allSessions.find(s => s.status === 'active') || null;
-    
+    // Use same method as recruiter endpoint - just filter by clientId and status
+    const activeSessions = await dbStore.getSessions({ 
+      clientId, 
+      status: 'active' 
+    });
+    const activeSession = activeSessions.length > 0 ? activeSessions[0] : null;
+
     if (!activeSession) {
-      console.log(`[SESSIONS] No active session found for client ${clientId}`);
       return res.json(null);
     }
     
-    console.log(`[SESSIONS] Active session found: ${activeSession.id} for client ${clientId}`);
-    
-    // Get recruiter info
-    const recruiters = await dbStore.getRecruiters();
-    const recruiter = recruiters.find(r => r.id === activeSession.recruiterId);
-    
-    // Get jobs applied during this session
+    // Get jobs count for this session (same as recruiter view)
     const allJobs = await dbStore.getJobs({ clientId });
     const sessionStart = new Date(activeSession.startTime);
     const sessionJobs = allJobs.filter(job => {
@@ -248,23 +246,9 @@ router.get('/me/active', verifyClient, async (req, res) => {
              (job.status === 'Applied' || job.status === 'To be Applied');
     });
     
-    // Calculate duration
-    const now = new Date();
-    const durationMs = now - sessionStart;
-    const durationMinutes = Math.round(durationMs / 1000 / 60);
-    const hours = Math.floor(durationMinutes / 60);
-    const minutes = durationMinutes % 60;
-    
     res.json({
       ...activeSession,
-      recruiter: recruiter ? { id: recruiter.id, name: recruiter.name, email: recruiter.email } : null,
-      jobsApplied: sessionJobs.length,
-      duration: {
-        totalMinutes: durationMinutes,
-        hours,
-        minutes,
-        formatted: hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
-      }
+      jobsApplied: sessionJobs.length
     });
   } catch (error) {
     console.error('Error fetching active session:', error);
@@ -272,53 +256,57 @@ router.get('/me/active', verifyClient, async (req, res) => {
   }
 });
 
-// Get session history for logged-in client
+// Get session history for logged-in client - EXACT SAME AS RECRUITER BUT NO RECRUITER FILTER
 router.get('/me/history', verifyClient, async (req, res) => {
   try {
     const { limit = 10 } = req.query;
     ensureDb();
     const clientId = req.user.id;
     
-    const allSessions = await dbStore.getSessions({ clientId });
-    const completedSessions = allSessions
-      .filter(s => s.status === 'completed' && s.endTime)
-      .sort((a, b) => new Date(b.endTime) - new Date(a.endTime))
-      .slice(0, parseInt(limit));
-    
-    const allJobs = await dbStore.getJobs({ clientId });
-    const recruiters = await dbStore.getRecruiters();
-    
-    const sessionsWithDetails = completedSessions.map(session => {
-      const recruiter = recruiters.find(r => r.id === session.recruiterId);
-      const sessionStart = new Date(session.startTime);
-      const sessionEnd = new Date(session.endTime);
-      
-      const sessionJobs = allJobs.filter(job => {
-        const jobDate = new Date(job.createdAt || job.date);
-        return jobDate >= sessionStart &&
-               jobDate <= sessionEnd &&
-               (job.status === 'Applied' || job.status === 'To be Applied');
-      });
-      
-      const durationMs = sessionEnd - sessionStart;
-      const durationMinutes = Math.round(durationMs / 1000 / 60);
-      const hours = Math.floor(durationMinutes / 60);
-      const minutes = durationMinutes % 60;
-      
-      return {
-        ...session,
-        recruiter: recruiter ? { id: recruiter.id, name: recruiter.name, email: recruiter.email } : null,
-        jobsApplied: sessionJobs.length,
-        duration: {
-          totalMinutes: durationMinutes,
-          hours,
-          minutes,
-          formatted: hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
-        }
-      };
+    // Use same method as recruiter endpoint
+    const completedSessions = await dbStore.getSessions({ 
+      clientId, 
+      status: 'completed',
+      limit: parseInt(limit)
     });
     
-    res.json(sessionsWithDetails);
+    const allJobs = await dbStore.getJobs({ clientId });
+    
+    // Map completed sessions with job counts and duration - EXACT SAME LOGIC AS RECRUITER
+    const clientSessions = completedSessions
+      .filter(s => s.endTime)
+      .sort((a, b) => new Date(b.endTime) - new Date(a.endTime))
+      .map(session => {
+        // Calculate jobs applied during this session
+        const sessionStart = new Date(session.startTime);
+        const sessionEnd = new Date(session.endTime);
+        const sessionJobs = allJobs.filter(job => {
+          const jobDate = new Date(job.createdAt || job.date);
+          return job.clientId === session.clientId &&
+                 jobDate >= sessionStart &&
+                 jobDate <= sessionEnd &&
+                 (job.status === 'Applied' || job.status === 'To be Applied');
+        });
+        
+        // Calculate duration
+        const durationMs = sessionEnd - sessionStart;
+        const durationMinutes = Math.round(durationMs / 1000 / 60);
+        const hours = Math.floor(durationMinutes / 60);
+        const minutes = durationMinutes % 60;
+        
+        return {
+          ...session,
+          jobsApplied: sessionJobs.length,
+          duration: {
+            totalMinutes: durationMinutes,
+            hours,
+            minutes,
+            formatted: hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+          }
+        };
+      });
+
+    res.json(clientSessions);
   } catch (error) {
     console.error('Error fetching session history:', error);
     res.status(500).json({ error: 'Server error' });
