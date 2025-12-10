@@ -8,7 +8,6 @@ let dbStore = null;
 try {
   dbStore = require('../utils/dbStore');
 } catch (error) {
-  console.error('❌ Database is required but not available:', error.message);
   throw new Error('Database connection is required. Please ensure database is configured and running.');
 }
 
@@ -135,7 +134,6 @@ router.get('/me/clients', verifyToken, async (req, res) => {
     res.json(clientsWithStats);
   } catch (error) {
     console.error('Error fetching clients:', error);
-    console.error('Error stack:', error.stack);
     res.status(500).json({ 
       error: 'Server error',
       message: error.message || 'Failed to fetch clients'
@@ -231,7 +229,6 @@ router.get('/me/dashboard', verifyToken, async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching dashboard:', error);
-    console.error('Error stack:', error.stack);
     res.status(500).json({ 
       error: 'Server error',
       message: error.message || 'Failed to fetch dashboard data'

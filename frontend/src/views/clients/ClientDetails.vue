@@ -644,7 +644,6 @@ const fetchClientDetails = async () => {
     // Jobs are now fetched separately with pagination
     await fetchJobs()
   } catch (error) {
-    console.error('Error fetching client details:', error)
     toastStore.error(error.response?.data?.error || 'Failed to load client details')
   } finally {
     loading.value = false
@@ -673,7 +672,6 @@ const fetchJobs = async () => {
     totalJobs.value = response.data.pagination?.total || 0
     totalPages.value = response.data.pagination?.totalPages || 0
   } catch (error) {
-    console.error('Error fetching jobs:', error)
     toastStore.error(error.response?.data?.error || 'Failed to load jobs')
   } finally {
     jobsLoading.value = false
@@ -695,7 +693,6 @@ const fetchActiveSession = async () => {
     activeSession.value = activeResponse.data
     previousSessions.value = historyResponse.data || []
   } catch (error) {
-    console.error('Error fetching session:', error)
   }
 }
 
@@ -706,7 +703,6 @@ const startSession = async () => {
     await fetchActiveSession()
     toastStore.success('Session started successfully!')
   } catch (error) {
-    console.error('Error starting session:', error)
     toastStore.error(error.response?.data?.error || 'Failed to start session')
   } finally {
     sessionLoading.value = false
@@ -722,7 +718,6 @@ const endSession = async () => {
     await Promise.all([fetchClientDetails(), fetchActiveSession()]) // Refresh to update today's count and session history
     toastStore.success('Session ended successfully!')
   } catch (error) {
-    console.error('Error ending session:', error)
     toastStore.error(error.response?.data?.error || 'Failed to end session')
     showEndSessionConfirm.value = false
   } finally {
@@ -832,7 +827,6 @@ const saveInstructions = async () => {
     isEditingInstructions.value = false
     toastStore.success('Instructions updated successfully!')
   } catch (error) {
-    console.error('Error updating instructions:', error)
     toastStore.error(error.response?.data?.error || 'Failed to update instructions')
   } finally {
     instructionsLoading.value = false
@@ -863,7 +857,6 @@ const deleteJob = async (jobId) => {
     await Promise.all([fetchClientDetails(), fetchJobs()])
     window.dispatchEvent(new CustomEvent('job-added'))
   } catch (error) {
-    console.error('Error deleting job:', error)
     toastStore.error(error.response?.data?.error || 'Failed to delete job')
   }
 }
@@ -898,7 +891,6 @@ const exportToCSV = () => {
     exportCSV(filteredJobs.value, `${client.value?.name || 'jobs'}-export`)
     toastStore.success('CSV exported successfully!')
   } catch (error) {
-    console.error('Export error:', error)
     toastStore.error(error.message || 'Failed to export CSV')
   }
 }
@@ -912,7 +904,6 @@ const exportToExcel = () => {
     exportXLSX(filteredJobs.value, `${client.value?.name || 'jobs'}-export`)
     toastStore.success('Excel file exported successfully!')
   } catch (error) {
-    console.error('Export error:', error)
     toastStore.error(error.message || 'Failed to export Excel')
   }
 }

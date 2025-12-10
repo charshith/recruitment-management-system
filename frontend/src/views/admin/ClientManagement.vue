@@ -372,11 +372,9 @@ const fetchClients = async (page = 1) => {
       })
       recruiters.value = recruitersRes.data.recruiters || recruitersRes.data || []
     } catch (recErr) {
-      console.error('Error fetching recruiters:', recErr)
       recruiters.value = []
     }
   } catch (err) {
-    console.error('Error fetching clients:', err)
     error.value = err.response?.data?.error || err.message || 'Failed to load clients'
     clients.value = []
     pagination.value = {

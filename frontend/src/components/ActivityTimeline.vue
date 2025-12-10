@@ -100,7 +100,6 @@ const fetchTimeline = async () => {
     activities.value = response.data || []
     hasMore.value = response.data.length >= currentLimit.value
   } catch (error) {
-    console.error('Error fetching timeline:', error)
   } finally {
     loading.value = false
   }

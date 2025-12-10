@@ -358,7 +358,6 @@ const saveAdmin = async () => {
     }
   } catch (err) {
     const errorMsg = err.response?.data?.error || 'Failed to save admin'
-    console.error('Error saving admin:', err)
     if (window.showToast) {
       window.showToast(errorMsg, 'error')
     } else {
@@ -390,7 +389,6 @@ const confirmDelete = async () => {
     fetchAdmins()
   } catch (err) {
     const errorMsg = err.response?.data?.error || 'Failed to delete admin'
-    console.error('Error deleting admin:', err)
     if (window.showToast) {
       window.showToast(errorMsg, 'error')
     } else {

@@ -320,7 +320,6 @@ const fetchData = async () => {
         const jobs = jobsResponse.data.jobs || jobsResponse.data || []
         allJobs.push(...jobs)
       } catch (err) {
-        console.error(`Error fetching jobs for client ${client.id}:`, err)
       }
     }
 
@@ -337,7 +336,6 @@ const fetchData = async () => {
     recentCompanies.value = Array.from(companySet).slice(0, 10)
     existingJobs.value = allJobs
   } catch (err) {
-    console.error('Error fetching data:', err)
   }
 }
 
@@ -357,7 +355,6 @@ const checkActiveSessions = async () => {
     }
     hasActiveSession.value = false
   } catch (err) {
-    console.error('Error checking sessions:', err)
   }
 }
 
@@ -396,7 +393,6 @@ const handlePaste = async (event) => {
     }
   } catch (err) {
     // Clipboard API not available or permission denied
-    console.log('Clipboard access not available')
   }
 }
 
@@ -435,7 +431,6 @@ const fetchJobsForClient = async (clientId) => {
     
     checkDuplicate()
   } catch (err) {
-    console.error('Error fetching jobs for client:', err)
   }
 }
 

@@ -200,12 +200,7 @@ const fetchDashboardData = async () => {
       monthApplications: 0
     }
     
-    console.log('Dashboard data loaded:', { 
-      clientsCount: clients.value.length, 
-      stats: stats.value 
-    })
   } catch (err) {
-    console.error('Error fetching dashboard data:', err)
     error.value = err.response?.data?.error || 'Failed to load dashboard data'
     
     // Show error toast

@@ -277,7 +277,6 @@ const fetchRecruiterDetails = async () => {
       })
       allClients.value = clientsRes.data.clients || []
     } catch (clientsErr) {
-      console.error('Error fetching clients:', clientsErr)
       allClients.value = []
     }
     

@@ -166,7 +166,6 @@ const handleSubmit = async () => {
       error.value = result.error || 'Login failed. Please try again.'
     }
   } catch (err) {
-    console.error('Login error:', err)
     error.value = err.response?.data?.error || 'An unexpected error occurred. Please try again.'
   } finally {
     loading.value = false

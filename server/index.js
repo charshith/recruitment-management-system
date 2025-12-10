@@ -8,7 +8,6 @@ dotenv.config();
 if (process.env.USE_DB === 'true' || process.env.USE_DB === '1') {
   try {
     require('./config/database');
-    console.log('📊 Database connection initialized');
   } catch (error) {
     console.warn('⚠️  Database connection failed, using file storage:', error.message);
   }
@@ -37,7 +36,6 @@ app.use('/api', (req, res, next) => {
 
 // Request logging (simple)
 app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
   next();
 });
 
@@ -68,8 +66,6 @@ const errorHandler = require('./middleware/errorHandler');
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
 
 

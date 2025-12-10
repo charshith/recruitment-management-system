@@ -73,7 +73,6 @@ export const useAuthStore = defineStore('auth', () => {
         localStorage.setItem('recruiter', JSON.stringify(recruiter.value));
       }
     } catch (error) {
-      console.error('Error refreshing recruiter:', error);
       // Don't auto-logout on refresh failure - let the component handle it
       // Only logout if it's a clear authentication error and we're not already on login page
       if (error.response?.status === 401 && window.location.pathname !== '/login') {
@@ -96,10 +95,8 @@ export const useAuthStore = defineStore('auth', () => {
         // Create new object to ensure reactivity
         admin.value = { ...response.data };
         localStorage.setItem('admin', JSON.stringify(admin.value));
-        console.log('✅ Admin data refreshed:', admin.value.name);
       }
     } catch (error) {
-      console.error('❌ Error refreshing admin:', error);
       if (error.response?.status === 401) {
         adminLogout();
       }
@@ -203,7 +200,6 @@ export const useAuthStore = defineStore('auth', () => {
         localStorage.setItem('client', JSON.stringify(client.value));
       }
     } catch (error) {
-      console.error('Error refreshing client:', error);
       if (error.response?.status === 401) {
         clientLogout();
       }

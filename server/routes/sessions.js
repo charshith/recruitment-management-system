@@ -6,23 +6,11 @@ const { verifyClient } = require('./clients');
 
 const { v4: uuidv4 } = require('uuid');
 
-// Helper to get database functions
-const getDbFunctions = () => {
-  try {
-    const db = require('../config/database');
-    return { query: db.query, getClient: db.getClient };
-  } catch (error) {
-    console.error('Failed to load database config:', error);
-    throw new Error('Database not available');
-  }
-};
-
 // Database is required - no file storage fallback
 let dbStore = null;
 try {
   dbStore = require('../utils/dbStore');
 } catch (error) {
-  console.error('❌ Database is required but not available:', error.message);
   throw new Error('Database connection is required. Please ensure database is configured and running.');
 }
 

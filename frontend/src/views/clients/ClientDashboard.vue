@@ -446,7 +446,6 @@ const fetchDashboardData = async () => {
       await loadPage(1)
     }
   } catch (err) {
-    console.error('Error fetching dashboard data:', err)
     error.value = err.response?.data?.error || 'Failed to load dashboard data'
     
     if (err.response?.status === 401) {
@@ -480,7 +479,6 @@ const loadPage = async (page) => {
       totalPages: 1
     }
   } catch (err) {
-    console.error('Error loading jobs:', err)
     toastStore.error('Failed to load jobs')
   } finally {
     loading.value = false

@@ -9,7 +9,6 @@ let dbStore = null;
 try {
   dbStore = require('../utils/dbStore');
 } catch (error) {
-  console.error('❌ Database is required but not available:', error.message);
   throw new Error('Database connection is required. Please ensure database is configured and running.');
 }
 
@@ -73,7 +72,6 @@ router.post('/recruiter/login', validateLogin, async (req, res) => {
     });
   } catch (error) {
     console.error('Login error:', error);
-    console.error('Error stack:', error.stack);
     res.status(500).json({ error: 'Server error during login' });
   }
 });

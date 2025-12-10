@@ -90,7 +90,6 @@ const fetchInsights = async () => {
     const response = await api.get('/recruiters/me/insights')
     insights.value = response.data || insights.value
   } catch (error) {
-    console.error('Error fetching insights:', error)
   } finally {
     loading.value = false
   }

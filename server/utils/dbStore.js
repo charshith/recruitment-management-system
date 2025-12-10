@@ -9,7 +9,6 @@ const getDbFunctions = () => {
     const db = require('../config/database');
     return { query: db.query, getClient: db.getClient };
   } catch (error) {
-    console.error('Failed to load database config:', error);
     throw new Error('Database not available');
   }
 };
@@ -40,7 +39,6 @@ const initializeDefaultData = async () => {
           new Date().toISOString()
         ]
       );
-      console.log('✅ Default admin created (email: admin@example.com, password: admin123)');
     }
     
     // Check if recruiters table has any data
@@ -79,7 +77,6 @@ const initializeDefaultData = async () => {
         ]
       );
 
-      console.log('✅ Default data initialized in database');
     }
   } catch (error) {
     console.error('Error initializing default data:', error);
@@ -237,7 +234,6 @@ const getRecruiters = async () => {
 const getRecruiterById = async (id) => {
   const { query: dbQuery } = getDbFunctions();
   if (!id) {
-    console.error('[DB] getRecruiterById called with null/undefined ID');
     return null;
   }
   

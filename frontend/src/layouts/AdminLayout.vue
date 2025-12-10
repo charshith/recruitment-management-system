@@ -237,7 +237,6 @@ const refreshAdminData = async () => {
         const _ = admin.value.name
       }
     } catch (error) {
-      console.error('Error refreshing admin data:', error)
     }
   }
 }

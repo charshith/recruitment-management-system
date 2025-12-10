@@ -279,7 +279,6 @@ const saveProfile = async () => {
     showEditModal.value = false
   } catch (err) {
     const errorMsg = err.response?.data?.error || 'Failed to update profile'
-    console.error('Error updating profile:', err)
     if (window.showToast) {
       window.showToast(errorMsg, 'error')
     } else {

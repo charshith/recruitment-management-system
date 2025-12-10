@@ -243,7 +243,6 @@ const handleSubmit = async () => {
     emit('updated')
     closeModal()
   } catch (err) {
-    console.error('Error updating job:', err)
     error.value = err.response?.data?.error || 'Failed to update job'
     toastStore.error(error.value)
   } finally {

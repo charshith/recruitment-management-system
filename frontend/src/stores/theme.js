@@ -14,7 +14,6 @@ export const useThemeStore = defineStore('theme', () => {
               // Default to light mode (bright mode) if no stored preference
               return false
             } catch (e) {
-              console.error('Error reading theme preference:', e)
               return false
             }
           }
@@ -37,7 +36,6 @@ export const useThemeStore = defineStore('theme', () => {
       
       localStorage.setItem('theme', shouldBeDark ? 'dark' : 'light')
     } catch (e) {
-      console.error('Error applying theme:', e)
     }
   }
   

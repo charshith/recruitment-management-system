@@ -10,7 +10,6 @@ let dbStore = null;
 try {
   dbStore = require('../utils/dbStore');
 } catch (error) {
-  console.error('❌ Database is required but not available:', error.message);
   throw new Error('Database connection is required. Please ensure database is configured and running.');
 }
 
