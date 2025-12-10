@@ -11,9 +11,7 @@ let dbStore = null;
 if (USE_DB) {
   try {
     dbStore = require('./dbStore');
-    console.log('📊 Using PostgreSQL database');
   } catch (error) {
-    console.warn('⚠️  Database not available, falling back to JSON files:', error.message);
   }
 }
 
