@@ -39,6 +39,7 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
+    "platforms": ["ios", "android"],
     "extra": {
       "eas": {
         "projectId": "your-project-id"
